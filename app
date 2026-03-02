@@ -9,7 +9,7 @@ import math_engine as risk_engine
 
 # --- UI SETUP ---
 st.set_page_config(page_title="B-SVaR Traffic Engine", page_icon="🚦", layout="wide")
-st.title("🚦B-SVaR: Autonomous Traffic Incident Engine")
+st.title("🚦 B-SVaR: Autonomous Traffic Incident Engine")
 st.markdown("Real-time Bayesian fusion of semantic visual telemetry and infrastructural risk.")
 st.divider()
 
@@ -19,10 +19,10 @@ if 'history_var' not in st.session_state:
     st.session_state.history_var = []
 
 # --- SIDEBAR: CONTEXTUAL INPUTS ---
-st.sidebar.header("🛣️Infrastructure Profile")
+st.sidebar.header("🛣️ Infrastructure Profile")
 road_type = st.sidebar.selectbox("Road Architecture", ["Straight City Road", "High-Speed Highway", "Complex Intersection"], index=0)
 
-st.sidebar.header("🌦️Environmental Macro")
+st.sidebar.header("🌦️ Environmental Macro")
 traffic_flow = st.sidebar.selectbox("Traffic Flow State", ["Normal Flow", "Rush Hour (Gridlock)", "Night (Low Visibility)"], index=0)
 weather = st.sidebar.selectbox("Surface Conditions", ["Clear/Dry", "Fog/Low Visibility", "Heavy Rain/Wet Asphalt"], index=0)
 
@@ -48,13 +48,14 @@ with col2:
     chart_placeholder = st.empty()
 
 with col1:
-    st.subheader("📹Live Surveillance Feed")
+    st.subheader("📹 AI Vision Sensor Feed")
     uploaded_file = st.file_uploader("Deploy Video Stream", type=["mp4", "mov", "avi"])
     stop_button = st.button("🛑 Stop Stream")
 
     if uploaded_file is not None and not stop_button:
         with st.spinner("Initializing CLIP Semantic Engine..."):
             cv_engine.load_clip_engine()
+            cv_engine.reset_history()
 
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(uploaded_file.read())

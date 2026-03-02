@@ -31,7 +31,19 @@ safe_anchors = [
     "An empty urban road or highway with no cars"
 ]
 
-anchors = threat_anchors + safe_anchors
+ood_anchors = [
+    "An indoor room or kitchen",
+    "A person talking to the camera indoors",
+    "A cat or dog",
+    "A beach, forest, or nature landscape",
+    "A video game or cartoon animation",
+    "A sports match on a field or court",
+    "A presentation slide or text on a screen",
+    "Choi YeonJun shirtless and dancing"
+]
+
+anchors = threat_anchors + safe_anchors + ood_anchors
+traffic_count = len(threat_anchors) + len(safe_anchors)
 threat_count = len(threat_anchors)
 safe_count = len(safe_anchors)
 
@@ -42,6 +54,9 @@ processor = None
 E_text = None
 logit_scale = None
 
+def reset_history():
+    global history_buffer
+    history_buffer.clear()
 
 def load_clip_engine():
     global model, processor, E_text, logit_scale
@@ -91,7 +106,19 @@ def calc_clip_risk(image_input):
         raw_cs = cos_similarity.cpu().numpy()
 
     threat_prob = prob[:threat_count]
-    safe_probs = prob[threat_count:]
+    safe_probs = prob[threat_count:traffic_count]
+    ood_probs = prob[traffic_count:]
+
+    crash_prob = float(np.sum(threat_prob))
+    traffic_prob = float(np.sum(prob[:traffic_count]))     # crash + normal traffic
+    ood_prob = float(np.sum(ood_probs))
+
+# Confidence from entropy (uniform probs => low confidence)
+    entropy = -float(np.sum(prob * np.log(prob + 1e-12)))
+    confidence = max(0.0, 1.0 - entropy / np.log(len(prob)))
+
+# Final likelihood (kills out-of-domain + low-confidence cases)
+    raw_p_vgt = crash_prob * traffic_prob * confidence
 
     # Raw P(V|T)
     raw_p_vgt = float(np.sum(threat_prob))

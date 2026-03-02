@@ -1,0 +1,157 @@
+import numpy as np
+import torch
+import torch.nn.functional as F
+from transformers import CLIPProcessor, CLIPModel
+from PIL import Image
+from io import BytesIO
+import logging
+from collections import deque
+
+logger = logging.getLogger(__name__)
+
+# --- THE ROLLING MEMORY BUFFER ---
+history_buffer = deque(maxlen=5)
+
+# --- TRAFFIC ANCHORS ---
+threat_anchors = [
+    "A violent traffic accident or severe car crash",
+    "A multi-car pileup on the road",
+    "A vehicle that has crashed, is damaged, or has crumpled metal",
+    "A vehicle swerving recklessly or out of control",
+    "An emergency situation on the road with stopped and damaged vehicles",
+    "A person lying injured on the street after an accident"
+]
+
+safe_anchors = [
+    "A normal city street with vehicles driving past safely",
+    "Heavy traffic moving slowly or bumper-to-bumper without incident",
+    "Cars stopped safely at a red light or in a traffic jam",
+    "A large bus or truck driving safely past the camera",
+    "Blurry movement from vehicles passing near the lens",
+    "An empty urban road or highway with no cars"
+]
+
+ood_anchors = [
+    "An indoor room or kitchen",
+    "A person talking to the camera indoors",
+    "A cat or dog",
+    "A beach, forest, or nature landscape",
+    "A video game or cartoon animation",
+    "A sports match on a field or court",
+    "A presentation slide or text on a screen",
+]
+
+anchors = threat_anchors + safe_anchors + ood_anchors
+traffic_count = len(threat_anchors) + len(safe_anchors)
+threat_count = len(threat_anchors)
+safe_count = len(safe_anchors)
+
+model_id = "openai/clip-vit-base-patch32"
+
+model = None
+processor = None
+E_text = None
+logit_scale = None
+
+def reset_history():
+    global history_buffer
+    history_buffer.clear()
+
+def load_clip_engine():
+    global model, processor, E_text, logit_scale
+    if E_text is not None:
+        return
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    logger.info("Loading " + model_id + " on " + device)
+    model = CLIPModel.from_pretrained(model_id).to(device)
+    processor = CLIPProcessor.from_pretrained(model_id)
+    model.eval()
+
+    with torch.no_grad():
+        text_inputs = processor(text=anchors, return_tensors="pt", padding=True, truncation=True).to(device)
+        text_outputs = model.text_model(input_ids=text_inputs["input_ids"],
+                                        attention_mask=text_inputs["attention_mask"])
+
+        raw_E_text = model.text_projection(text_outputs.pooler_output)
+        E_text = raw_E_text / raw_E_text.norm(p=2, dim=1, keepdim=True)
+        logit_scale = model.logit_scale.exp()
+
+    logger.info("CLIP ready, logit_scale = " + str(round(logit_scale.item(), 2)))
+
+
+def calc_clip_risk(image_input):
+    global history_buffer
+    if E_text is None:
+        raise RuntimeError("Call load_clip_engine() before calculations")
+
+    if isinstance(image_input, bytes):
+        image = Image.open(BytesIO(image_input)).convert("RGB")
+    elif isinstance(image_input, str):
+        image = Image.open(image_input).convert("RGB")
+    else:
+        image = image_input.convert("RGB")
+
+    with torch.no_grad():
+        img_inputs = processor(images=image, return_tensors="pt").to(E_text.device)
+        vision_outputs = model.vision_model(pixel_values=img_inputs["pixel_values"])
+        v_raw_image = model.visual_projection(vision_outputs.pooler_output)
+
+        v_image = v_raw_image / v_raw_image.norm(p=2, dim=1, keepdim=True)
+        cos_similarity = (v_image @ E_text.T).squeeze(0)
+
+        L = logit_scale * cos_similarity
+        prob = F.softmax(L, dim=0).cpu().numpy()
+        raw_cs = cos_similarity.cpu().numpy()
+
+    threat_prob = prob[:threat_count]
+    safe_probs = prob[threat_count:traffic_count]
+    ood_probs = prob[traffic_count:]
+
+    eps = 1e-6
+
+    crash_prob = float(np.sum(threat_prob))
+    safe_prob  = float(np.sum(safe_probs))
+    
+    traffic_prob = crash_prob + safe_prob
+    crash_share = crash_prob / max(traffic_prob, eps)     # “how crash-like” among traffic labels
+    safe_share  = safe_prob  / max(traffic_prob, eps)
+    
+    # Keep a light "is this traffic at all?" gate
+    ood_prob = float(np.sum(ood_probs))
+    raw_p_vgt  = float(np.clip(crash_share * (1.0 - ood_prob), 0.0, 1.0))
+    
+    # Also return p_vgnt properly:
+    p_vgnt = float(np.clip(safe_share, 0.0, 1.0))
+
+
+    # --- TEMPORAL SMOOTHING ---
+    history_buffer.append(raw_p_vgt)
+    alpha = 0.6
+    if len(history_buffer) == 0:
+        smoothed = raw_p_vgt
+    else:
+        smoothed = alpha * raw_p_vgt + (1 - alpha) * history_buffer[-1]
+    history_buffer.append(smoothed)
+    smoothed_p_vgt = float(smoothed)
+
+    top_idx = int(np.argmax(threat_prob))
+
+    threat_scores = {threat_anchors[i]: float(threat_prob[i]) for i in range(threat_count)}
+    safe_scores = {safe_anchors[i]: float(safe_probs[i]) for i in range(safe_count)}
+    cosine_dict = {anchors[i]: float(raw_cs[i]) for i in range(len(anchors))}
+
+    return {
+        "p_vgt": smoothed_p_vgt,
+        "raw_p_vgt": raw_p_vgt,
+        "prob": prob.tolist(),
+        "threat_scores": threat_scores,
+        "safe_scores": safe_scores,
+        "top_threat": threat_anchors[top_idx],
+        "top_threat_score": float(threat_prob[top_idx]),
+        "cosine_similarity": cosine_dict,
+        "logit_scale": float(logit_scale.item()),
+        "p_vgnt": p_vgnt,
+        "traffic_prob": traffic_prob,
+        "ood_prob": ood_prob,
+    }

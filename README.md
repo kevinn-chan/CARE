@@ -1,4 +1,4 @@
-# 🚦 B-SVaR: Bayesian-Simulated Value-at-Risk
+# 🚦Bayesian-Simulated Value-at-Risk
 **Autonomous Traffic Incident Engine for Context-Aware Public Safety**
 
 ### **1. The Vision**
@@ -25,3 +25,37 @@ Traditional safety AI is binary—it detects objects but ignores context. This c
 ```bash
 git clone [https://github.com/YOUR_USERNAME/B-SVaR.git](https://github.com/YOUR_USERNAME/B-SVaR.git)
 cd B-SVaR
+```
+
+**Step 2: Install Dependencies**
+Ensure you have Python 3.9+ installed, then run:
+```bash
+pip install -r requirements.txt
+```
+*(Note: Core dependencies include `torch`, `transformers`, `streamlit`, `opencv-python`, `numpy`, `pandas`, and `pillow`.)*
+
+---
+
+### **5. How to Run the Project**
+
+**Launch the Live Dashboard (UI)**
+To view the real-time Bayesian fusion and interact with the environmental toggles:
+```bash
+streamlit run app.py
+```
+This will open the application in your default web browser. You can use the sidebar to change the "Infrastructure Profile" and watch the Blue VaR Line dynamically adjust to the new environment.
+
+**Run the Automated Testbench (Headless)**
+To verify the system's operational reliability and mathematical stability without the UI:
+```bash
+python testbench/run_testbench.py
+```
+This script will output the results of three critical stress tests:
+1. **Nominal Flow**: Verifies baseline stability in clear conditions.
+2. **Paranoid AI (Prevention)**: Tests the system's ability to raise the VaR floor during extreme weather (Night/Rain) to prevent false positives.
+3. **Messy Reality (Checking)**: A stress test proving the Bayesian filter successfully suppresses high visual "false positives" during a stormy rush hour.
+
+---
+
+**Developed by Team Kuteng**
+*Quantifying the chaos of the smart city to support informed decision-making.*

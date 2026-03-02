@@ -1,4 +1,5 @@
-# Autonomous Traffic Incident Engine for Context-Aware Public Safety
+# Context Aware Risk Engine (CARE)
+**Autonomous Traffic Incident Engine for Context-Aware Public Safety**
 **🚦Bayesian-Simulated Value-at-Risk**
 
 ### **1. The Vision**

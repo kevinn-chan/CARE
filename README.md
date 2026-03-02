@@ -48,7 +48,7 @@ This will open the application in your default web browser. You can use the side
 **Run the Automated Testbench (Headless)**
 To verify the system's operational reliability and mathematical stability without the UI:
 ```bash
-python workbench.py
+python testbench\workbench.py
 ```
 This script will output the results of three critical stress tests:
 1. **Nominal Flow**: Verifies baseline stability in clear conditions.

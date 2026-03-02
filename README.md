@@ -1,6 +1,6 @@
 # Context Aware Risk Engine (CARE)
-**Autonomous Traffic Incident Engine for Context-Aware Public Safety**
-**🚦Bayesian-Simulated Value-at-Risk**
+**Autonomous Traffic Incident Engine for Context-Aware Public Safety
+🚦Bayesian-Simulated Value-at-Risk**
 
 ### **1. The Vision**
 Surveillance cameras and traditional safety AI detects objects but ignores context. This creates an "Interpretation Gap" where a rainy night triggers the same alerts as a clear afternoon, leading to fatal alarm fatigue. 

@@ -1,8 +1,0 @@
-streamlit
-opencv-python
-numpy
-scipy
-pandas
-Pillow
-torch
-transformers

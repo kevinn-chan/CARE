@@ -52,8 +52,8 @@ python testbench/workbench.py
 ```
 This script will output the results of three critical stress tests:
 1. **Nominal Flow**: Verifies baseline stability in clear conditions.
-2. **Paranoid AI (Prevention)**: Tests the system's ability to raise the VaR floor during extreme weather (Night/Rain) to prevent false positives.
-3. **Messy Reality (Checking)**: A stress test proving the Bayesian filter successfully suppresses high visual "false positives" during a stormy rush hour.
+2. **False Positive Prevention**: Tests the system's ability to raise the VaR floor during extreme weather (Night/Rain) to prevent false positives.
+3. **Actual Crash**: A stress test proving the Bayesian filter successfully suppresses high visual "false positives" during a stormy rush hour.
 
 ---
 

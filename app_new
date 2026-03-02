@@ -9,7 +9,7 @@ import math_engine as risk_engine
 
 # --- UI SETUP ---
 st.set_page_config(page_title="B-SVaR Traffic Engine", page_icon="🚦", layout="wide")
-st.title("🚦B-SVaR: Autonomous Traffic Incident Engine")
+st.title("🚦 Autonomous Traffic Incident Engine")
 st.markdown("Real-time Bayesian fusion of semantic visual telemetry and infrastructural risk.")
 st.divider()
 

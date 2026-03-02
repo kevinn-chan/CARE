@@ -123,13 +123,14 @@ def calc_clip_risk(image_input):
     
     p_vgnt = float(np.clip(safe_share, 0.0, 1.0))
 
-    history_buffer.append(raw_p_vgt)
     alpha = 0.6
     if len(history_buffer) == 0:
         smoothed = raw_p_vgt
     else:
-        smoothed = alpha * raw_p_vgt + (1 - alpha) * history_buffer[-1]
-    history_buffer.append(smoothed)
+        prev = history_buffer[-1]         
+        smoothed = alpha * raw_p_vgt + (1 - alpha) * prev
+    
+    history_buffer.append(smoothed)      
     smoothed_p_vgt = float(smoothed)
 
     top_idx = int(np.argmax(threat_prob))

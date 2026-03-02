@@ -9,7 +9,7 @@ import math_engine as risk_engine
 
 # --- UI SETUP ---
 st.set_page_config(page_title="B-SVaR Traffic Engine", page_icon="🚦", layout="wide")
-st.title("🚦 B-SVaR: Autonomous Traffic Incident Engine")
+st.title("🚦B-SVaR: Autonomous Traffic Incident Engine")
 st.markdown("Real-time Bayesian fusion of semantic visual telemetry and infrastructural risk.")
 st.divider()
 
@@ -19,10 +19,10 @@ if 'history_var' not in st.session_state:
     st.session_state.history_var = []
 
 # --- SIDEBAR: CONTEXTUAL INPUTS ---
-st.sidebar.header("🛣️ Infrastructure Profile")
+st.sidebar.header("🛣️Infrastructure Profile")
 road_type = st.sidebar.selectbox("Road Architecture", ["Straight City Road", "High-Speed Highway", "Complex Intersection"], index=0)
 
-st.sidebar.header("🌦️ Environmental Macro")
+st.sidebar.header("🌦️Environmental Macro")
 traffic_flow = st.sidebar.selectbox("Traffic Flow State", ["Normal Flow", "Rush Hour (Gridlock)", "Night (Low Visibility)"], index=0)
 weather = st.sidebar.selectbox("Surface Conditions", ["Clear/Dry", "Fog/Low Visibility", "Heavy Rain/Wet Asphalt"], index=0)
 
@@ -37,7 +37,7 @@ prior_pt, var_threshold = risk_engine.monte_carlo_sims(
 col1, col2 = st.columns([2, 1.2])
 
 with col2:
-    st.subheader("📊 Quantitative Risk Metrics")
+    st.subheader("📊Quantitative Risk Metrics")
     m1, m2 = st.columns(2)
     m1.metric(label="Contextual Prior $P(T)$", value=f"{prior_pt:.4f}")
     m2.metric(label="95% VaR Threshold", value=f"{var_threshold:.4f}")
@@ -48,7 +48,7 @@ with col2:
     chart_placeholder = st.empty()
 
 with col1:
-    st.subheader("📹 AI Vision Sensor Feed")
+    st.subheader("📹Live SUrveillance Feed")
     uploaded_file = st.file_uploader("Deploy Video Stream", type=["mp4", "mov", "avi"])
     stop_button = st.button("🛑 Stop Stream")
 
@@ -88,12 +88,12 @@ with col1:
                 st.session_state.history_posterior.append(posterior_ptv)
                 st.session_state.history_var.append(var_threshold)
 
-                likelihood_placeholder.info(f"👁️ **Smoothed Vision Likelihood $P(V|T)$:** `{likelihood_pvt:.4f}`")
+                likelihood_placeholder.info(f"👁️**Smoothed Vision Likelihood $P(V|T)$:** `{likelihood_pvt:.4f}`")
 
                 if posterior_ptv > var_threshold:
-                    status_placeholder.error(f"🚨 **CRASH DETECTED** \n\nPosterior Risk ({posterior_ptv:.4f}) exceeded VaR.")
+                    status_placeholder.error(f"🚨**CRASH DETECTED** \n\nPosterior Risk ({posterior_ptv:.4f}) exceeded VaR.")
                 else:
-                    status_placeholder.success(f"✅ **TRAFFIC NOMINAL** \n\nPosterior Risk ({posterior_ptv:.4f}) absorbed by context.")
+                    status_placeholder.success(f"✅**TRAFFIC NOMINAL** \n\nPosterior Risk ({posterior_ptv:.4f}) absorbed by context.")
 
                 chart_data = pd.DataFrame({
                     "Live Posterior Risk": st.session_state.history_posterior,

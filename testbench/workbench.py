@@ -1,4 +1,11 @@
 import math_engine as risk_engine
+import sys
+import os
+
+# Add parent directory to path to import math_engine
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import math_engine as risk_engine
 
 def run_scenario(name, road, flow, weather, vision_likelihood):
     print(f"\n{'=' * 60}")

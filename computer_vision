@@ -109,16 +109,7 @@ def calc_clip_risk(image_input):
     safe_probs = prob[threat_count:traffic_count]
     ood_probs = prob[traffic_count:]
 
-    crash_prob = float(np.sum(threat_prob))
-    traffic_prob = float(np.sum(prob[:traffic_count]))     # crash + normal traffic
-    ood_prob = float(np.sum(ood_probs))
-
-# Confidence from entropy (uniform probs => low confidence)
-    entropy = -float(np.sum(prob * np.log(prob + 1e-12)))
-    confidence = max(0.0, 1.0 - entropy / np.log(len(prob)))
-
-# Final likelihood (kills out-of-domain + low-confidence cases)
-    raw_p_vgt = crash_prob * traffic_prob * confidence
+    raw_p_vgt = float(np.sum(threat_prob))
 
 
     # --- TEMPORAL SMOOTHING ---

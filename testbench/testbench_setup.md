@@ -1,4 +1,4 @@
-# 🛠️ B-SVaR Testbench: Setup & Execution Guide
+# 🛠️Testbench: Setup & Execution Guide
 
 This testbench allows judges and reviewers to strictly verify the mathematical stability and Bayesian logic of the B-SVaR system without requiring a live video feed or GPU acceleration. It executes four targeted stress tests to prove the system's "Operational Reliability."
 

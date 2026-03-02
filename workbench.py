@@ -2,23 +2,23 @@ import math_engine as risk_engine
 
 def run_scenario(name, road, flow, weather, vision_likelihood):
     print(f"\n{'=' * 60}")
-    print(f"🔬 WORKBENCH SCENARIO: {name}")
+    print(f"🔬WOorkbench Scenario: {name}")
     print(f"{'=' * 60}")
     print(f"Context   : {road} | {flow} | {weather}")
     print(f"Telemetry : Vision P(V|T) = {vision_likelihood:.4f}")
     print("-" * 60)
 
-    # 1. Stochastic Engine
+    #Stochastic Engine
     prior, var_threshold = risk_engine.monte_carlo_sims(
         flow=flow,
         weather=weather,
         road=road
     )
 
-    # 2. Bayesian Fusion
+    #Bayesian Fusion
     posterior = risk_engine.calculate_bayesian_posterior(prior, vision_likelihood)
 
-    # 3. Calculate Delta (Risk Spread)
+    #calculate Delta (risk spread)
     spread = posterior - var_threshold
 
     print(f"Contextual Prior P(T) : {prior:.4f}")
@@ -27,50 +27,50 @@ def run_scenario(name, road, flow, weather, vision_likelihood):
     print("-" * 60)
 
     if posterior > var_threshold:
-        print(f"🚨 RESULT: BREACH DETECTED (+{spread:.4f} over VaR)")
-        print("   Logic: Visual evidence outweighed environmental uncertainty.")
+        print(f"🚨RESULT: BREACH DETECTED (+{spread:.4f} over VaR)")
+        print("Logic: Visual evidence outweighed environmental uncertainty.")
     else:
-        print(f"✅ RESULT: ALARM SUPPRESSED ({spread:.4f} under VaR)")
-        print("   Logic: Visual anomaly absorbed by contextual noise floor.")
+        print(f"✅RESULT: ALARM SUPPRESSED ({spread:.4f} under VaR)")
+        print("Logic: Visual anomaly absorbed by contextual noise floor.")
 
 
 if __name__ == "__main__":
-    print("\n🚀 INITIALIZING B-SVaR TRAFFIC WORKBENCH...\n")
+    print("\n🚀INITIALIZING B-SVaR TRAFFIC WORKBENCH...\n")
 
-    # SCENARIO 1: Perfect Day (Baseline)
-    # Expected: Low Prior, tight VaR. Even a moderate vision score should trigger an alert because the baseline is stable.
+    #scenario 1 (base line): Normal Day
+    #moderate vision score should trigger an alert because baseline is stable
     run_scenario(
-        name="The 'Perfect Tuesday' (Nominal Conditions)",
+        name="Normal Day (base line)",
         road="Straight City Road",
         flow="Normal Flow",
         weather="Clear/Dry",
         vision_likelihood=0.65
     )
 
-    # SCENARIO 2: Paranoid AI (Extreme Noise, Safe Vision)
-    # Expected: Massive VaR threshold due to rain and night. Low vision score. The system should aggressively suppress any false positives.
+    #scenario 2: False Positive Prevention (high noise, but safe vision)
+    #higher VaR threshold due to rain and night time
     run_scenario(
-        name="The 'Paranoid AI' (High Macro Noise)",
+        name="False Positive Prevention",
         road="Complex Intersection",
         flow="Night (Low Visibility)",
         weather="Heavy Rain/Wet Asphalt",
         vision_likelihood=0.20
     )
 
-    # SCENARIO 3: Messy Reality (High Noise, Moderate Vision Jitter)
-    # Expected: A traffic jam in the rain causes CLIP to get confused and output a 0.70. A standard AI would trigger a false alarm here. B-SVaR should suppress it.
+    #scenario 3: False Positive Check (high noise, moderate vision certainty)
+    #traffic jam and rain might cause visual confusion, system should aggressively suppress false positives
     run_scenario(
-        name="The 'Messy Reality' (Stress Test)",
+        name="False Positive Check",
         road="High-Speed Highway",
         flow="Rush Hour (Gridlock)",
         weather="Heavy Rain/Wet Asphalt",
         vision_likelihood=0.70
     )
 
-    # SCENARIO 4: Undeniable Crash (High Noise, Absolute Vision Certainty)
-    # Expected: Even in a rainstorm, if the cars physically mash together and CLIP outputs a 0.95, it must breach the elevated VaR boundary.
+    #scenario 4: Actual Crash (high noise, high vision certainty)
+    #definite crash even though VaR threshold is high
     run_scenario(
-        name="The 'Undeniable Crash' (True Positive Override)",
+        name="Actual Crash",
         road="Complex Intersection",
         flow="Rush Hour (Gridlock)",
         weather="Heavy Rain/Wet Asphalt",
@@ -78,5 +78,5 @@ if __name__ == "__main__":
     )
 
     print(f"\n{'=' * 60}")
-    print("🏁 WORKBENCH COMPLETE. ALL STOCHASTIC BOUNDARIES VERIFIED.")
+    print("🏁Workbench complete. All stochastic boundaries verified.")
     print(f"{'=' * 60}\n")
